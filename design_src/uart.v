@@ -6,12 +6,10 @@
 
 module uart
 #(
-    parameter LIMITE = 163,     //limite de cuenta del baudrate
-    parameter NB_CONTA = 8,     //cant de bits del contador del baudrate
+    parameter CLK_FREQ = 50000000, 
+    parameter BAUD_RATE = 19200,
     parameter N_BITS = 8,       //cant de bits de datos
-    parameter N_TICKS = 16,      //cant de ticks para llegar al ancho de un bit
-    parameter CLK_FREQ = 50000000, //provisional
-    parameter BAUD_RATE = 19200 //provisional
+    parameter N_TICKS = 16      //cant de ticks para llegar al ancho de un bit
 )
 (
     input   wire                i_clock,

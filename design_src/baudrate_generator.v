@@ -16,13 +16,10 @@ module baudrate_generator
     output  wire    o_ticks //pulso cada 16 ciclos de clock
 );
 
-localparam COUNT_MAX_VALUE = COUNT_MAX_VALUE = CLK_FREQ / (BAUD_RATE * 16);
+localparam COUNT_MAX_VALUE  = CLK_FREQ / (BAUD_RATE * 16);
 localparam NB_COUNTER = $clog2(COUNT_MAX_VALUE);
 
-//localparam NB_CONTA = 8 //mitad de los 16 ticks
-//localparam COUNT_MAX_VALUE = 163;
-
-reg [NB_CONTA-1 : 0] conta; //leva la cuenta de los ciclos de reloj
+reg [NB_COUNTER-1 : 0] conta; //leva la cuenta de los ciclos de reloj
 
 assign o_ticks = (conta == COUNT_MAX_VALUE);
 
