@@ -27,8 +27,6 @@ module tb_top();
     localparam  SRA = 6'b000011;
     localparam  SRL = 6'b000010;
     localparam  NOR = 6'b100111;
-    localparam  NO_VALID1 = 6'b000001;
-    localparam  NO_VALID2 = 6'b111000;
     localparam  MAX = 2;//10
     
     //TB signals
@@ -53,7 +51,7 @@ module tb_top();
     test_start = 1'b0;
     i_reset = 1'b1;
     i_rx = 1'b1;  
-    codeOperacion = {ADD, SUB, AND, OR, XOR, SRA, SRL, NOR, NO_VALID1, NO_VALID2};
+    codeOperacion = {ADD, SUB, AND, OR, XOR, SRA, SRL, NOR};
     data = {N_BITS {1'b0}};
 
     #80

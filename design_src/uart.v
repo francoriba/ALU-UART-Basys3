@@ -9,7 +9,9 @@ module uart
     parameter LIMITE = 163,     //limite de cuenta del baudrate
     parameter NB_CONTA = 8,     //cant de bits del contador del baudrate
     parameter N_BITS = 8,       //cant de bits de datos
-    parameter N_TICKS = 16      //cant de ticks para llegar al ancho de un bit
+    parameter N_TICKS = 16,      //cant de ticks para llegar al ancho de un bit
+    parameter CLK_FREQ = 50000000, //provisional
+    parameter BAUD_RATE = 19200 //provisional
 )
 (
     input   wire                i_clock,
@@ -29,8 +31,8 @@ wire    tick;  //cable que une el baudrate generator con el Rx y el Tx
 
 baudrate_generator
 #(
-    .LIMITE         (LIMITE),
-    .NB_CONTA       (NB_CONTA)
+    .CLK_FREQ       (CLK_FREQ),
+    .BAUD_RATE       (BAUD_RATE)
 )
 u_baudrate_generator
 (

@@ -9,11 +9,12 @@ module uart_receptor
     input   wire    i_clock,
     input   wire    i_reset,
     input   wire    i_rx,
-    input   wire    i_s_tick,
-    output  wire    o_rx_done_tick,
-    output  wire [N_BITS-1:0] o_dout
+    input   wire    i_s_tick,  //señal de temporización para contar los ticks
+    output  wire    o_rx_done_tick, // indica cuando se ha completado la recepción de un byte UART
+    output  wire [N_BITS-1:0] o_dout // bus de datos de 8bits paralelos con el dato recibido
 );
 
+//estados de la maquina 
 localparam IDLE 	= 4'b0001;
 localparam START 	= 4'b0010;
 localparam DATA 	= 4'b0100;
@@ -39,7 +40,7 @@ begin
             b <= {N_BITS {1'b0}};
         end
     else
-        begin
+        begin // actualizar cuentas de bits, ticks y buffer
             state <= next_state;
             s <= s_next;
             n <= n_next;
@@ -59,7 +60,7 @@ begin
                 if(i_rx == 1'b0) //si llego el bit de start paso al estado START
                     begin
                         next_state = START;
-                        s_next = 4'b0;
+                        s_next = 4'b0; //s_next = 0 
                     end
             end
         START:
@@ -68,28 +69,28 @@ begin
                     if(s == 7) //si llegue a la mitad del bit de START paso al estado DATA y debo contar 16 ticks
                         begin
                             next_state = DATA;
-                            s_next = 4'b0;
+                            s_next = 4'b0; // reinicio s_next
                             n_next = 3'b0;
                         end
                     else
-                        s_next = s + 4'b1;
+                        s_next = s + 4'b1; // s_next++
             end
         DATA:
             begin
                 if(i_s_tick == 1'b1)
                     if(s == (N_TICKS-1))
                         begin
-                            s_next = 4'b0;
-                            b_next = {i_rx, b[N_BITS-1:1]};
+                            s_next = 4'b0; // reinicio s_next
+                            b_next = {i_rx, b[N_BITS-1:1]}; //cada bit de datos recibido (i_rx), se concatena al buffer b_next
                             if(n == (N_BITS-1))  //si ya lei todos los bits del dato paso al sig estado
                                 next_state = STOP;
                             else
-                                n_next = n + 3'b1;
+                                n_next = n + 3'b1; // n_next++
                         end
                     else
-                        s_next = s + 4'b1;
+                        s_next = s + 4'b1; // s_next++
             end
-        STOP:
+        STOP: //si llega un tick y la cuenta de ticks era 15, pasamos a idle, sino s_next++
             begin
                 if(i_s_tick == 1'b1)
                     if(s == (N_TICKS-1)) //1 bit de stop
@@ -98,7 +99,7 @@ begin
                         end
                     else
                         begin
-                            s_next = s + 4'b1;
+                            s_next = s + 4'b1; // s_next++
                         end
             end
         default:
