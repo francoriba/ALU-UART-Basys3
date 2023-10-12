@@ -25,14 +25,14 @@ module interfaz
     output  wire    o_valid
 );
 
-localparam ESPERA_DATO_A    = 4'b0001;
-localparam ESPERA_DATO_B    = 4'b0010;
-localparam ESPERA_OP        = 4'b0100;
-localparam ENVIAR_RESULT    = 4'b1000;
+localparam WAIT_OP_A        = 4'b0001;
+localparam WAIT_OP_B        = 4'b0010;
+localparam WAIT_OPCODE    = 4'b0100;
+localparam SEND_RESULT    = 4'b1000;
 localparam NB_OP = 6;
 
-reg [3:0] state = ESPERA_DATO_A;
-reg [3:0] next_state = ESPERA_DATO_A;
+reg [3:0] state = WAIT_OP_A ;
+reg [3:0] next_state = WAIT_OP_A;
 reg [NB_DATA-1 : 0] dato_A;
 reg [NB_DATA-1 : 0] dato_B;
 reg [NB_OP-1 : 0] operacion;
@@ -47,7 +47,7 @@ always @(posedge i_clock) //State register
 begin
     if(i_reset)
     begin
-        state <= ESPERA_DATO_A;
+        state <= WAIT_OP_A;
         dato_A <= {NB_DATA {1'b0}};
         dato_B <= {NB_DATA {1'b0}};
         operacion <= {NB_OP {1'b0}};
@@ -69,37 +69,37 @@ begin
     operacion_reg = operacion;
     
     case(state)
-        ESPERA_DATO_A: 
+        WAIT_OP_A: 
         begin
         if(i_valid)
             begin
-                next_state = ESPERA_DATO_B;
+                next_state = WAIT_OP_B;
                 dato_A_reg = i_dato;
             end
         end
-        ESPERA_DATO_B:
+        WAIT_OP_B:
         begin
         if(i_valid)
             begin
-                next_state = ESPERA_OP;
+                next_state = WAIT_OPCODE;
                 dato_B_reg = i_dato; 
             end           
         end
-        ESPERA_OP:
+        WAIT_OPCODE:
         begin
         if(i_valid)
             begin
-                next_state = ENVIAR_RESULT;
+                next_state = SEND_RESULT;
                 operacion_reg = i_dato[0 +: NB_OP];
             end
         end
-        ENVIAR_RESULT:
+        SEND_RESULT:
         begin
-            next_state = ESPERA_DATO_A;       
+            next_state = WAIT_OP_A;       
         end
     default: 
     begin
-        next_state = ESPERA_DATO_A; // Fault Recovery -> vuelve al estado inicial
+        next_state = WAIT_OP_A; // Fault Recovery -> vuelve al estado inicial
         dato_A_reg = {NB_DATA {1'b0}};
         dato_B_reg = {NB_DATA {1'b0}};
         operacion_reg = {NB_OP {1'b0}};          
@@ -110,10 +110,10 @@ end
 always @(posedge i_clock)
 begin
     case(state)
-        ESPERA_DATO_A: resultado_listo <= 1'b0;
-        ESPERA_DATO_B: resultado_listo <= 1'b0;
-        ESPERA_OP: resultado_listo <= 1'b0;
-        ENVIAR_RESULT: resultado_listo <= 1'b1;
+        WAIT_OP_A: resultado_listo <= 1'b0;
+        WAIT_OP_B: resultado_listo <= 1'b0;
+        WAIT_OPCODE: resultado_listo <= 1'b0;
+        SEND_RESULT: resultado_listo <= 1'b1;
         default: resultado_listo <= 1'b0;
     endcase
 

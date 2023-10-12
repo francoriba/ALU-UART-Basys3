@@ -7,7 +7,7 @@
 module top
 #(
     parameter CLK_FREQ = 50000000,
-    parameter BAUD_RATE = 19200,
+    parameter BAUD_RATE = 9600,
     parameter N_BITS = 8,       //cant de bits de datos
     parameter N_TICKS = 16      //cant de ticks para llegar al ancho de un bit
 
@@ -17,7 +17,9 @@ module top
     input   wire                i_reset,
     input   wire                i_rx,
     output  wire                o_tx_done_tick,
-    output  wire                o_tx
+    output  wire                o_tx,
+    output  wire [7:0]          o_led_output // Suponiendo que tienes 8 LEDs disponibles en la placa Basys3
+
 );
 
 wire    [N_BITS-1:0]    argumentos; //bus que une o_dout(Rx) con i_dato(interfaz)
@@ -25,7 +27,13 @@ wire                    input_valid; //cable que une o_rx_done_tick(Rx) con i_va
 wire    [N_BITS-1:0]    resultado; //bus que une o_result(interfaz) con i_din(Tx)
 wire                    output_valid; //cable que une o_valid(interfaz) con i_ready(Tx)
 
+reg signed [7:0] result; //resgister for storing result
+assign o_led_output = result;
 
+always @(*) 
+    begin
+         result = resultado; // Asigna el resultado a la señal de salida para los LEDs
+    end
 
 uart
 #(

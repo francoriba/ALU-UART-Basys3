@@ -90,7 +90,7 @@ begin
                     if(s == (N_TICKS-1))
                         begin
                             s_next = 4'b0;
-                            b_next = b >> 1;
+                            b_next = b >> 1; //desplazamiento del buffer a la derecha
                             if(n == (N_BITS-1))  
                                 next_state = STOP;
                             else

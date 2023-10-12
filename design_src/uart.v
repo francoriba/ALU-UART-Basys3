@@ -16,9 +16,9 @@ module uart
     input   wire                i_reset,
     input   wire                i_rx,
     input   wire                i_ready,
-    input   wire [N_BITS-1:0]   i_din,
+    input   wire [N_BITS-1:0]   i_din, // datos de entrada para ser transmitidos al transmisor uart
     output  wire                o_rx_done_tick,
-    output  wire [N_BITS-1:0]   o_dout,
+    output  wire [N_BITS-1:0]   o_dout, //datos recibidos desde el receptor uart
     output  wire                o_tx_done_tick,
     output  wire                o_tx
     

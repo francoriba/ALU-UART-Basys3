@@ -30,7 +30,7 @@ if portVar is None:
 else:
     # Configurar la conexión serie
     serialInst = serial.Serial()
-    serialInst.baudrate = 9600
+    serialInst.baudrate = 9600 #19200 #9600
     serialInst.port = portVar
 
     try:

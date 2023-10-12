@@ -8,7 +8,7 @@
 module baudrate_generator
 #(
     parameter CLK_FREQ = 50000000,
-    parameter BAUD_RATE = 19200
+    parameter BAUD_RATE = 9600
 )
 (
     input   wire    i_clock,
@@ -16,8 +16,8 @@ module baudrate_generator
     output  wire    o_ticks //pulso cada 16 ciclos de clock
 );
 
-localparam COUNT_MAX_VALUE  = CLK_FREQ / (BAUD_RATE * 16);
-localparam NB_COUNTER = $clog2(COUNT_MAX_VALUE);
+localparam COUNT_MAX_VALUE  = 163; //CLK_FREQ / (BAUD_RATE * 16);
+localparam NB_COUNTER = 8; // $clog2(COUNT_MAX_VALUE);
 
 reg [NB_COUNTER-1 : 0] conta; //leva la cuenta de los ciclos de reloj
 
