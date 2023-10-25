@@ -1,75 +1,92 @@
-`timescale 1ns / 1ps
-/*
-    Modulo Top que conecta la UART con la interfaz y ALU
-*/
-
-
-module top
-#(
-    parameter CLK_FREQ = 50000000,
-    parameter BAUD_RATE = 9600,
-    parameter N_BITS = 8,       //cant de bits de datos
-    parameter N_TICKS = 16      //cant de ticks para llegar al ancho de un bit
-
-)
+module top#
 (
-    input   wire                i_clock,
-    input   wire                i_reset,
-    input   wire                i_rx,
-    output  wire                o_tx_done_tick,
-    output  wire                o_tx,
-    output  wire [7:0]          o_led_output // Suponiendo que tienes 8 LEDs disponibles en la placa Basys3
-
+    parameter NB_DATA = 8,
+    parameter N_TICKS = 16,
+    parameter COUNTER_LIMIT = 326,
+    parameter NB_COUNTER = 9,
+    parameter PTR_LEN = 2,
+    parameter NB_OPCODE = 6     
+)
+( 
+    input wire i_clk,
+    input wire i_reset,
+    input wire i_uartRx,
+    output wire o_uartTx
 );
 
-wire    [N_BITS-1:0]    argumentos; //bus que une o_dout(Rx) con i_dato(interfaz)
-wire                    input_valid; //cable que une o_rx_done_tick(Rx) con i_valid(interfaz)
-wire    [N_BITS-1:0]    resultado; //bus que une o_result(interfaz) con i_din(Tx)
-wire                    output_valid; //cable que une o_valid(interfaz) con i_ready(Tx)
+wire tx_full;
+wire rx_empty;
+wire [NB_DATA-1:0] data_to_read;
 
-reg signed [7:0] result; //resgister for storing result
-assign o_led_output = result;
+wire rx_read;
+wire tx_write;
+wire [NB_DATA-1:0] data_to_write;
+wire [NB_OPCODE-1:0] alu_opcode;
+wire [NB_DATA-1:0] alu_op_A;
+wire [NB_DATA-1:0] alu_op_B;
 
-always @(*) 
-    begin
-         result = resultado; // Asigna el resultado a la señal de salida para los LEDs
-    end
+wire [NB_DATA-1:0] alu_result;
+//wire zero;
+//wire overFlow;
 
-uart
-#(
-    .CLK_FREQ           (CLK_FREQ),    
-    .BAUD_RATE           (BAUD_RATE),     
-    .N_BITS             (N_BITS),      
-    .N_TICKS            (N_TICKS)      
-)
-u_uart
+uart_core#
 (
-    .i_clock            (i_clock),
-    .i_reset            (i_reset),
-    .i_rx               (i_rx),
-    .i_ready            (output_valid),
-    .i_din              (resultado),
-    .o_rx_done_tick     (input_valid),
-    .o_dout             (argumentos),
-    .o_tx_done_tick     (o_tx_done_tick),
-    .o_tx               (o_tx)
+    .NB_DATA(NB_DATA),
+    .N_TICKS(N_TICKS),
+    .COUNTER_LIMIT(COUNTER_LIMIT),
+    .NB_COUNTER(NB_COUNTER),
+    .PTR_LEN(PTR_LEN)        
+) uartUnit
+(
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_read_uart(rx_read),
+    .i_write_uart(tx_write),
+    .i_rx(i_uartRx),
+    .i_data_to_write(data_to_write),
+
+    .o_tx_full(tx_full),
+    .o_rx_empty(rx_empty),
+    .o_tx(o_uartTx),
+    .o_data_to_read(data_to_read)
 );
 
-interfaz
-#(
-    .NB_DATA            (N_BITS)
-)
-u_interfaz
+interface#
 (
-    .i_clock            (i_clock),
-    .i_reset            (i_reset),
-    .i_valid            (input_valid),
-    .i_dato             (argumentos),
-    .o_result           (resultado),
-    .o_valid            (output_valid)
+    .NB_DATA(NB_DATA),
+    .NB_OPCODE(NB_OPCODE)     
+) interfaceUnit
+(
+    .i_clk(i_clk),
+    .i_reset(i_reset),
+    .i_alu_result(alu_result),
+    .i_data_to_read(data_to_read),
+    .i_fifo_rx_empty(rx_empty),
+    .i_fifo_tx_full(tx_full),
+   // .i_aluOverflow(overFlow),
+   // .i_aluZero(zero),
+
+    .o_fifo_rx_read(rx_read),
+    .o_fifo_tx_write(tx_write),
+    .o_data_to_write(data_to_write),
+    .o_alu_opcode(alu_opcode),
+    .o_alu_op_A(alu_op_A),
+    .o_alu_op_B(alu_op_B),
+    .o_is_valid()
 );
 
+alu#
+(
+    .NB_DATA(NB_DATA),
+    .NB_OPCODE(NB_OPCODE)
+) aluUnit
+( 
+    .i_op_A(alu_op_A),
+    .i_op_B(alu_op_B),
+    .i_opcode(alu_opcode),
+    .o_alu_result(alu_result)
+    //.o_zero(zero),
+   // .o_overFlow(overFlow)
+); 
 
-
-
-endmodule //top
+endmodule

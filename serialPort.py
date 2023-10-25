@@ -1,8 +1,59 @@
+import sys
 import serial
 import serial.tools.list_ports
 
-def main():
-    # Listar los puertos serie disponibles
+continuar = True
+BAUDRATE = 19200 #set baudrate for this comunication
+
+OPCODES = {
+    'ADD':  0x20,
+    'SUB':  0x22,
+    'AND':  0x24,
+    'OR' :  0x25,
+    'XOR':  0x26,
+    'NOR':  0x27,
+    'SRA':  0x03,
+    'SRL':  0x02
+}
+
+class SerialPortControl:
+    def __init__(self, port):
+        self.serial_port = serial.Serial(port, BAUDRATE, timeout=1)
+
+    def get_crc(self, data):
+        return data ^ 0xFF
+
+    def send_serial_data(self):
+        operand1_hex = input('Operando 1 (Hex): ')
+        operand2_hex = input('Operando 2 (Hex): ')
+        operation = input('Seleccione la Operación (ADD, SUB, AND, OR, XOR, NOR, SRA, SRL): ')
+
+        if operation not in OPCODES:
+            print('Operación no válida')
+            return
+
+        operand1 = int(operand1_hex, 16)
+        operand2 = int(operand2_hex, 16)
+        selected_operation = OPCODES[operation]
+
+        crc = self.get_crc(selected_operation ^ operand1 ^ operand2)
+
+        data_to_send = bytes([selected_operation, operand1, operand2, crc])
+        self.serial_port.write(data_to_send)
+
+        received_data = self.serial_port.read(2)
+        if len(received_data) == 2:
+            received_result, received_crc = received_data
+            calculated_crc = self.get_crc(received_result)
+            if received_crc == calculated_crc:
+                result = int.from_bytes(bytes([received_result]), byteorder='big')
+                print('Resultado:', hex(result))
+            else:
+                print('Error de CRC: Descartando resultado')
+        else:
+            print('Error de recepción: No se recibieron los datos correctamente')
+
+def select_serial_port():
     ports = serial.tools.list_ports.comports()
     portList = []
 
@@ -10,54 +61,25 @@ def main():
     for i, port in enumerate(ports):
         print(f"{i}: {port.device}")
         portList.append(port.device)
-
-    # Solicitar al usuario que seleccione un puerto
     try:
         selected_port_index = int(input("Seleccione el número de puerto: "))
         if 0 <= selected_port_index < len(portList):
             selected_port = portList[selected_port_index]
             print(f"Puerto seleccionado: {selected_port}")
+            return selected_port
         else:
             print("Selección de puerto fuera de rango.")
-            return
+            return None
     except ValueError:
         print("Entrada no válida. Debe ingresar un número válido.")
-        return
-
-    # Configurar la conexión serie
-    serialInst = serial.Serial(selected_port, baudrate=9600)  # Selecciona el puerto y la velocidad de baudios
-
-    continue_flag = True
-
-    while continue_flag:
-        try:
-            # Envío de datos
-            data_A = input("Operando A: ")
-            data_B = input("Operando B: ")
-            opcode = input("Opcode: ")
-
-            # Enviar los datos
-            serialInst.write(data_A.encode())
-            serialInst.write(data_B.encode())
-            serialInst.write(opcode.encode())
-
-            # Leer respuesta
-            response = serialInst.read(1).decode()
-
-            print(f"Respuesta recibida: {response}")
-
-            # Preguntar si se desea repetir el proceso
-            repeat = input("¿Desea hacer otra operación? (y/n): ")
-            if repeat.lower() != 'y':
-                continue_flag = False
-        except KeyboardInterrupt:
-            print("\nPrograma detenido por el usuario.")
-            continue_flag = False
-        except Exception as e:
-            print("Ocurrió un error:", str(e))
-
-    # Cerrar el puerto serie al salir
-    serialInst.close()
+        return None
 
 if __name__ == "__main__":
-    main()
+    selected_port = select_serial_port()
+    if selected_port:
+        app = SerialPortControl(selected_port)
+        while continuar:
+            app.send_serial_data()
+            response = input('Nueva operacion? y/n: ')
+            if response == 'y' or response == 'Y': continuar = True
+            if response == 'n' or response == 'N': continuar = False
