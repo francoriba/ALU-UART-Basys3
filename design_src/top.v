@@ -11,12 +11,16 @@ module top#
     input wire i_clk,
     input wire i_reset,
     input wire i_uartRx,
-    output wire o_uartTx
+    output wire o_uartTx,
+    output wire [NB_DATA-1:0] result_leds
 );
+
+assign result_leds = alu_result;
 
 wire tx_full;
 wire rx_empty;
 wire [NB_DATA-1:0] data_to_read;
+
 
 wire rx_read;
 wire tx_write;
@@ -26,8 +30,7 @@ wire [NB_DATA-1:0] alu_op_A;
 wire [NB_DATA-1:0] alu_op_B;
 
 wire [NB_DATA-1:0] alu_result;
-//wire zero;
-//wire overFlow;
+
 
 uart_core#
 (
@@ -63,8 +66,6 @@ interface#
     .i_data_to_read(data_to_read),
     .i_fifo_rx_empty(rx_empty),
     .i_fifo_tx_full(tx_full),
-   // .i_aluOverflow(overFlow),
-   // .i_aluZero(zero),
 
     .o_fifo_rx_read(rx_read),
     .o_fifo_tx_write(tx_write),
@@ -85,8 +86,6 @@ alu#
     .i_op_B(alu_op_B),
     .i_opcode(alu_opcode),
     .o_alu_result(alu_result)
-    //.o_zero(zero),
-   // .o_overFlow(overFlow)
 ); 
 
 endmodule

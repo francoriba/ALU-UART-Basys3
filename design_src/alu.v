@@ -29,7 +29,7 @@ begin
     case (i_opcode)
         ADD : result = i_op_A + i_op_B;   
         SUB : result = i_op_A - i_op_B;    
-      	AND : result= i_op_A & i_op_B;    
+      	AND : result= i_op_A & i_op_B;  
         OR  : result = i_op_A | i_op_B;    
         XOR : result = i_op_A ^ i_op_B;   
         SRA : result = i_op_A >>> i_op_B;  

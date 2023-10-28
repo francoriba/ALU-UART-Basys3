@@ -10,8 +10,6 @@ module interface#
     input wire [NB_DATA-1:0] i_data_to_read,
     input wire i_fifo_rx_empty,
     input wire i_fifo_tx_full,
-//    input wire i_aluOverflow,
-//    input wire i_aluZero,
 
     output wire o_fifo_rx_read,
     output wire o_fifo_tx_write,
@@ -186,7 +184,6 @@ always @(*) begin
 
     endcase
 end
-
 
 assign crc = opcode_sel ^ operand_a_sel ^ operand_b_sel ^ 8'hff;
 assign o_is_valid = (crc == crc_reg) ? 1 : 0;
