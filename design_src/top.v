@@ -15,7 +15,6 @@ module top#
     output wire [NB_DATA-1:0] result_leds
 );
 
-assign result_leds = alu_result;
 
 wire tx_full;
 wire rx_empty;
@@ -31,6 +30,7 @@ wire [NB_DATA-1:0] alu_op_B;
 
 wire [NB_DATA-1:0] alu_result;
 
+assign result_leds = alu_result;
 
 uart_core#
 (

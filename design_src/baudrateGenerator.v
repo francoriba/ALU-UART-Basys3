@@ -4,8 +4,8 @@
 
 module baudrateGenerator#
 (
-    parameter NB_COUNTER= 5, //Number of bits for counter
-    parameter COUNTER_LIMIT = 20 //Limit for counter
+    parameter NB_COUNTER = 5,       //Number of bits for counter
+    parameter COUNTER_LIMIT = 20    //Limit for counter
 )
 (
     input wire i_clk,
