@@ -20,9 +20,6 @@ class SerialPortControl:
     def __init__(self, port):
         self.serial_port = serial.Serial(port, BAUDRATE, timeout=1)
 
-    def get_crc(self, data):
-        return data ^ 0xFF
-
     def send_serial_data(self):
         operand1_hex = input('Operando 1 (Hex): ')
         operand2_hex = input('Operando 2 (Hex): ')
@@ -36,11 +33,7 @@ class SerialPortControl:
         operand2 = int(operand2_hex, 16)
         selected_operation = OPCODES[operation]
 
-        # Calcula un byte de CRC (no se utiliza, pero se envía)
-        crc = self.get_crc(selected_operation ^ operand1 ^ operand2)
-
-        # Envía un byte adicional para el CRC (no se utiliza en el módulo Interface)
-        data_to_send = bytes([selected_operation, operand1, operand2, crc])
+        data_to_send = bytes([selected_operation, operand1, operand2])
         self.serial_port.write(data_to_send)
 
         received_data = self.serial_port.read(1)
