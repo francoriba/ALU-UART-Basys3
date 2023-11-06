@@ -9,7 +9,7 @@ OPCODES = {
     'ADD': 0x20,
     'SUB': 0x22,
     'AND': 0x24,
-    'OR': 0x25,
+    'OR':  0x25,
     'XOR': 0x26,
     'NOR': 0x27,
     'SRA': 0x03,
