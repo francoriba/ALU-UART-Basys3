@@ -15,7 +15,6 @@ module fifo#
 );
 
 //FIFO operations
-localparam NOP = 2'b00;
 localparam READ = 2'b01;
 localparam WRITE = 2'b10;
 localparam READWRITE = 2'b11;
@@ -75,12 +74,11 @@ always @(*) begin
     empty_next = empty;
 
     case ({i_write_fifo, i_read_fifo})
-        //NOP:
         READ:
             if (~empty) begin
-                read_ptr_next = read_ptr_ok;
+                read_ptr_next = read_ptr_ok;   //desplazar puntero
                 full_next = 1'b0;
-                if (read_ptr_ok==write_ptr) begin
+                if (read_ptr_ok==write_ptr) begin //fifo esta vacia
                     empty_next = 1'b1;
                 end
             end
@@ -88,7 +86,7 @@ always @(*) begin
             if (~full) begin
                 write_ptr_next = write_ptr_ok;
                 empty_next = 1'b0;
-                if (write_ptr_ok==read_ptr) begin
+                if (write_ptr_ok==read_ptr) begin //fifo esta llena
                     full_next = 1'b1;
                 end
             end
